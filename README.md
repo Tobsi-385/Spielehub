@@ -1,2 +1,0 @@
-# Spielehub
-Multiplayer Spielehub
