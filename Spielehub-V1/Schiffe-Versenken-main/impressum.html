@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de" data-theme="realistic">
+  <!-- Dokumentkopf / Metadaten -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Impressum</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+       <!-- HUD: Titel + Navigation -->
+      <header class="hud">
+        <h1 class="title">
+          <span class="metal" id="hudMetal" data-i18n="hud_metal">Schiffe versenken</span>
+          <span class="deluxe" id="hudDeluxe" data-i18n="hud_deluxe">Deluxe</span>
+        </h1>
+        <!-- HUD Aktionen: Sprache + Startseite -->
+        <div class="hud-actions">
+          <button id="btnLang" class="icon-btn" data-i18n-attr="title:language">🌐</button>
+          <a href="index.html" class="icon-btn" data-i18n-attr="title:legal_back_home">🏠</a>
+        </div>
+      </header>
+       <!-- Impressum -->
+      <section class="panel" style="margin: 18px auto; max-width: 980px;">
+        <div id="impressumBody"></div>
+      </section>
+    </div>
+
+    <!-- Skripte -->
+    <script src="lang.js?v=5"></script>
+
+<!-- Rechtliche Informationen -->
+<footer class="legal-bar" role="contentinfo">
+  <div class="legal-bar__inner">
+
+    <!-- Copyright -->
+    <span id="footerCopy">© 2026 Dein Name</span>
+    <!-- Kurz-Impressum -->
+    <span id="footerLegalLine">
+      <span id="footerLegalLabel" data-i18n="footer_legal_label">Impressum:</span>
+      <span id="footerLegalAddress">Musterstraße 1, 12345 Musterstadt</span>
+    </span>
+    <!-- Link zum vollständigen Impressum -->
+    <a
+      id="footerLegalLink"
+      class="legal-bar__link"
+      href="impressum.html"
+      data-i18n="footer_full_legal"
+      data-i18n-attr="aria-label:footer_full_legal_aria"
+      aria-label="Zum vollständigen Impressum"
+    >Vollständiges Impressum</a>
+  </div>
+</footer>
+
+</body>
+</html>

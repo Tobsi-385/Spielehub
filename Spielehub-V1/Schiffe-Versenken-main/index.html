@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html data-theme="realistic" lang="de">
+<!-- Dokumentkopf -->
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Schiffe versenken Deluxe</title>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app">
+<!-- HUD -->
+<header class="hud">
+<h1 class="title">
+<span class="metal" data-i18n="hud_metal" id="hudMetal">Schiffe versenken</span>
+<span class="deluxe" data-i18n="hud_deluxe" id="hudDeluxe">Deluxe</span>
+</h1>
+<div class="hud-actions">
+<button class="icon-btn" data-i18n-attr="title:soundToggle" id="btnSound">🔊</button>
+<button class="icon-btn" data-i18n-attr="title:backToMenu,aria-label:backToMenu" id="btnMenu">🏠</button>
+<button class="icon-btn" data-i18n-attr="title:language" id="btnLang">🌐</button>
+<a class="icon-btn" data-i18n-attr="title:legal_title" href="impressum.html">§</a></div>
+</header>
+<!-- Hintergrundanimation -->
+<div aria-hidden="true" class="water-bg"></div>
+<!-- Startmenü -->
+<main class="screen active" id="menu">
+<div class="menu-panel">
+<h2 class="menu-title" data-i18n="gameTitle">Schiffe versenken Deluxe</h2>
+<!-- Hauptmenü -->
+<section class="menu-section" id="mainMenu">
+
+<div class="menu-choice menu-choice--stack">
+<button class="cta" data-i18n="menu_local_btn" id="btnChooseLocal">Lokales Spiel</button>
+<button class="cta alt" data-i18n="menu_mp_btn" id="btnChooseMP">Multiplayer</button>
+<button class="cta cta-spectate" data-i18n="menu_spectate_btn" id="btnChooseSpectate">Zuschauen (Multiplayer)</button>
+</div>
+</section>
+<!-- Lokales Spiel: Auswahl -->
+<section class="menu-section setup-panel" hidden="" id="localChoice">
+<div class="setup-head">
+<h3><span data-i18n="local_choice_title">Lokales Spiel</span></h3>
+<button class="ghost" data-i18n="back" id="btnBackFromLocalChoice" type="button"> Zurück </button>
+</div>
+<div class="menu-choice">
+<button class="cta" data-i18n="local_vs_ai" id="btnLocalChooseAI">Gegen Computer</button>
+<button class="cta alt" data-i18n="local_2p" id="btnLocalChoose2P">2 Spieler (lokal)</button>
+</div>
+</section>
+<!-- Lokales Spiel: Setup -->
+<section class="menu-section setup-panel" hidden="" id="localSetup">
+<div class="setup-head">
+<h3 data-i18n="local_setup_title" id="localSetupTitle">Lokales Spiel – Setup</h3>
+<button class="ghost" data-i18n="back" id="btnBackFromLocal" type="button"> Zurück </button>
+</div>
+<label class="field">
+<span data-i18n="p1_name">Spieler 1 Name</span>
+<input data-i18n-attr="placeholder:p1_ph" id="nameP1" maxlength="16" placeholder="Admiral Blau" type="text"/>
+</label>
+<label class="field" id="p2Field">
+<span data-i18n="p2_name">Spieler 2 Name</span>
+<input data-i18n-attr="placeholder:p2_ph" id="nameP2" maxlength="16" placeholder="Admiral Rot" type="text"/>
+</label>
+<div class="radio-row" id="aiDifficulty">
+<label><input checked="" name="ai" type="radio" value="easy"> <span data-i18n="ai_label_easy">Einfach</span></input></label>
+<label><input name="ai" type="radio" value="smart"> <span data-i18n="ai_label_smart">Smart</span></input></label>
+</div>
+<button class="cta" data-i18n="start_game" id="btnLocalStart">Spiel starten</button>
+<button class="cta" data-i18n="local_vs_ai" hidden="" id="btnVsAI">Vs Computer</button>
+<button class="cta alt" data-i18n="local_2p" hidden="" id="btnLocal">Local 2 players</button>
+</section>
+<!-- Multiplayer: Zuschauen -->
+<section class="menu-section setup-panel" hidden="" id="spectateSetup">
+<div class="setup-head">
+<h3 data-i18n="mp_spectate_title">Multiplayer – Zuschauen</h3>
+<button class="ghost" data-i18n="back" id="btnBackFromSpectate" type="button"> Zurück </button>
+</div>
+<label class="field">
+<span data-i18n="room_code_label">Lobby code</span>
+<input data-i18n-attr="placeholder:room_ph" id="roomCodeSpectate" maxlength="8" placeholder="ABCD12" type="text"/>
+</label>
+<button class="cta cta-spectate" data-i18n="mp_spectate_btn" id="btnSpectateRoom" type="button">Zuschauen</button>
+</section>
+<!-- Multiplayer: Setup -->
+<section class="menu-section setup-panel" hidden="" id="mpChoice">
+<div class="setup-head">
+<h3 data-i18n="mp_choice_title">Multiplayer</h3>
+<button class="ghost" data-i18n="back" id="btnBackFromMpChoice" type="button"> Zurück </button>
+</div>
+<div class="menu-choice">
+<button class="cta" data-i18n="mp_create" id="btnMpChooseCreate">Lobby erstellen</button>
+<button class="cta alt" data-i18n="mp_join" id="btnMpChooseJoin">Lobby beitreten</button>
+</div>
+</section>
+<!-- Multiplayer: Lobby Setup -->
+<section class="menu-section setup-panel" hidden="" id="mpSetup">
+<div class="setup-head">
+<h3 data-i18n="mp_setup_title" id="mpSetupTitle">Multiplayer – Setup</h3>
+<button class="ghost" data-i18n="back" id="btnBackFromMP" type="button"> Zurück </button>
+</div>
+<label class="field">
+<span data-i18n="your_name">Dein Name</span>
+<input data-i18n-attr="placeholder:online_ph" id="nameOnline" maxlength="16" placeholder="Admiral Online" type="text"/>
+</label>
+<label class="field">
+<span data-i18n="room_code_label">Lobby code</span>
+<input data-i18n-attr="placeholder:room_ph" id="roomCode" maxlength="8" placeholder="ABCD12" type="text"/>
+</label>
+<p class="hint" data-i18n="mp_hint_create" id="mpHintCreate" style="margin-top: -4px">Bei „Lobby erstellen“ wird automatisch ein Code generiert, falls leer.</p>
+<button class="cta" data-i18n="create" id="btnCreateRoom" type="button">Erstellen</button>
+<button class="cta alt" data-i18n="join" id="btnJoinRoom" type="button">Beitreten</button>
+</section>
+</div>
+</main>
+<!-- Spielansicht -->
+<section class="screen" id="game">
+<div class="stage">
+  <!-- Spielstatus-Leiste -->
+  <div class="game-bar is-simple" hidden id="gameBar" role="region" aria-label="Spielinformationen">
+    <div class="game-bar__left">
+      <span class="game-bar__title" data-i18n="bar_title">⚓ Schiffeversenken Deluxe</span>
+      <span class="game-bar__chip" id="barMode" data-i18n="bar_mode_local">🎮 Lokal</span>
+    </div>
+    <div class="game-bar__center">
+      <span class="game-bar__chip" id="barPhase" data-i18n="bar_phase_place">🛠️ Platzieren</span>
+      <span class="game-bar__chip" id="barTurn">🎯 —</span>
+      <!-- Kurz-Erklärungen -->
+      <div class="game-bar__help" id="barHelp" aria-label="Kurzanleitung" data-i18n-attr="aria-label:bar_help_aria">
+        <span class="help-item" id="helpRotate" title="Dreht das aktuell ausgewählte Schiff (im Platzieren-Modus)." data-i18n-attr="title:help_rotate_title"><kbd>R</kbd> <span data-i18n="help_rotate_label">Drehen</span></span>
+        <span class="help-item" id="helpRemove" title="Entfernt ein platziertes Schiff vom eigenen Board." data-i18n-attr="title:help_remove_title"><span data-i18n="help_remove_label">Doppelklick: Entfernen</span></span>
+        <span class="help-item" id="helpRandom" title="Platziert alle Schiffe automatisch auf deinem Board." data-i18n-attr="title:help_random_title"><span data-i18n="help_random_label">Zufall: Autoplatzierung</span></span>
+        <span class="help-item" id="helpAttack" title="Greife an: Klicke auf ein Feld auf dem gegnerischen Board." data-i18n-attr="title:help_attack_title"><span data-i18n="help_attack_label">Angriff: Klick aufs Feld</span></span>
+      </div>
+    </div>
+    <div class="game-bar__right">
+      <span class="game-bar__status" id="barStatus">…</span>
+      <button class="game-bar__btn" id="barBtnSound" type="button" title="Sound" data-i18n-attr="title:soundToggle">🔊</button>
+      <button class="game-bar__btn" id="barBtnRestart" type="button" title="Neu starten" data-i18n-attr="title:restart">🔄</button>
+      <button class="game-bar__btn" id="barBtnMenu" type="button" title="Menü" data-i18n-attr="title:backToMenu">🏠</button>
+    </div>
+  </div>
+<!-- Multiplayer Lobby Panel -->
+<div class="mp-lobby" hidden="" id="mpLobby">
+<div class="mp-lobby-inner">
+<div class="mp-lobby-row">
+<div class="mp-lobby-code"><span data-i18n="mp_lobby_code_prefix">Lobby code:</span> <span id="mpLobbyCode">—</span></div>
+<div class="mp-lobby-role" id="mpLobbyRole"></div>
+</div>
+<div class="mp-lobby-players" id="mpLobbyPlayers"></div>
+<div class="mp-lobby-actions">
+<button class="ghost" id="btnMpReady" type="button">Bereit</button>
+<button class="cta" disabled="" id="btnMpStart" type="button"> Spiel starten </button>
+</div>
+</div>
+</div>
+<!-- Eigenes Board -->
+<div class="side">
+<h3 id="labelOwn">Dein Board</h3>
+<div aria-label="Eigenes Spielfeld" class="board" id="ownBoard" role="grid"></div>
+<!-- Werft -->
+<h4 class="dock-title">⚓ Werft – Schiffe zum Platzieren</h4>
+<div aria-label="Schiffswerft (Drag &amp; Drop)" class="dock" id="shipDock">
+</div>
+<div class="placement-actions">
+<button class="ghost" id="btnRandom">Zufallsplatzierung</button>
+<button class="cta" disabled="" id="btnStart">Spiel starten</button>
+</div>
+</div>
+<div class="divider"></div>
+<!-- Gegnerisches Board -->
+<div class="side">
+<h3 id="labelEnemy">Gegnerisches Board</h3>
+<div aria-label="Gegnerisches Spielfeld" class="board" id="enemyBoard" role="grid"></div>
+<div class="game-actions">
+<button class="ghost" id="btnRestart">Neu starten</button>
+</div>
+<div aria-live="assertive" class="status" id="status"> Platziere deine Schiffe … </div>
+</div>
+</div>
+</section>
+<!-- Übergabe-Overlay für lokales Spiel -->
+<div aria-hidden="true" class="overlay" id="handover">
+<div class="handover-card">
+<div class="ship-silhouette">🚢</div>
+<h2 data-i18n="next_player_prompt" id="handoverText">Next player — press any key …</h2>
+</div>
+</div>
+<!-- Spielende -->
+<div aria-hidden="true" class="overlay" id="endOverlay">
+<div class="end-card">
+<h2 id="endText">Herzlichen Glückwunsch!</h2>
+<div aria-hidden="true" class="confetti"></div>
+<div class="end-boards">
+  <div>
+    <h3>Dein Board</h3>
+    <div class="board readonly" id="endOwnBoard"></div>
+  </div>
+  <div>
+    <h3>Gegner</h3>
+    <div class="board readonly" id="endEnemyBoard"></div>
+  </div>
+</div>
+<button class="cta" id="btnPlayAgain">Nochmal spielen</button>
+</div>
+</div>
+<!-- Audioeffekte -->
+<audio id="sfxHit" preload="auto"></audio>
+<audio id="sfxMiss" preload="auto"></audio>
+<audio id="sfxSink" preload="auto"></audio>
+<audio id="sfxWin" preload="auto"></audio>
+</div>
+<!-- Skripte -->
+<script src="lang.js?v=5"></script>
+<script src="mp-client.js?v=3"></script>
+<script src="app.js?v=2"></script>
+<!-- Rechtliche Informationen -->
+<footer class="legal-bar" role="contentinfo">
+<div class="legal-bar__inner">
+<span id="footerCopy">© 2026 Dein Name</span>
+<span id="footerLegalLine">
+<span data-i18n="footer_legal_label" id="footerLegalLabel">Impressum:</span>
+<span id="footerLegalAddress">Musterstraße 1, 12345 Musterstadt</span>
+</span>
+<a aria-label="Zum vollständigen Impressum" class="legal-bar__link" data-i18n="footer_full_legal" data-i18n-attr="aria-label:footer_full_legal_aria" href="impressum.html" id="footerLegalLink">Vollständiges Impressum</a>
+</div>
+</footer>
+</body>
+</html>
