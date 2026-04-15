@@ -3,703 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spielehub – Kniffel & Schiffe versenken</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet" />
+  <title>Spielehub</title>
   <style>
-    /* ─── TOKENS ─────────────────────────────────────── */
-    :root {
-      --ink:      #0d0d12;
-      --parch:    #f5ede0;
-      --gold:     #c9973a;
-      --gold-lt:  #e8c476;
-      --red:      #8b2020;
-      --navy:     #0f2040;
-      --navy-lt:  #1a3560;
-      --sea:      #1e5f74;
-      --fog:      rgba(245,237,224,0.06);
-      --shadow:   0 8px 40px rgba(0,0,0,0.7);
-
-      --font-display: 'Cinzel Decorative', serif;
-      --font-body:    'Crimson Pro', Georgia, serif;
-    }
-
-    /* ─── RESET ──────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
     body {
-      font-family: var(--font-body);
-      background: var(--ink);
-      color: var(--parch);
+      margin: 0;
       min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ─── ANIMATED BACKGROUND ────────────────────────── */
-    .bg-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    /* Deep gradient */
-    .bg-canvas::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background:
-        radial-gradient(ellipse 80% 60% at 20% 10%, #1a2a4a 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 80%, #1a1205 0%, transparent 60%),
-        radial-gradient(ellipse 100% 100% at 50% 50%, #0d0d12 0%, #060608 100%);
-    }
-
-    /* Stars */
-    .bg-canvas::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.25) 0%, transparent 100%),
-        radial-gradient(1px 1px at 40% 10%, rgba(255,255,255,0.35) 0%, transparent 100%),
-        radial-gradient(1px 1px at 60% 25%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 75% 8%,  rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 88% 20%, rgba(255,255,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 15% 55%, rgba(255,255,255,0.15) 0%, transparent 100%),
-        radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 5%  80%, rgba(255,255,255,0.15) 0%, transparent 100%),
-        radial-gradient(1px 1px at 35% 75%, rgba(255,255,255,0.1) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.2) 0%, transparent 100%);
-    }
-
-    /* Floating particles */
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0;
-      animation: drift linear infinite;
-    }
-    @keyframes drift {
-      0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 0.6; }
-      100% { transform: translateY(-20vh) rotate(720deg); opacity: 0; }
-    }
-
-    /* Subtle grid lines */
-    .bg-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(201,151,58,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201,151,58,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
-
-    /* ─── LAYOUT ─────────────────────────────────────── */
-    .page {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 0 24px 80px;
-    }
-
-    /* ─── HERO HEADER ────────────────────────────────── */
-    header {
-      width: 100%;
-      max-width: 900px;
-      text-align: center;
-      padding: 72px 0 48px;
-      position: relative;
-    }
-
-    .header-ornament {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.1s forwards;
-    }
-
-    .ornament-line {
-      flex: 1;
-      max-width: 120px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    }
-
-    .ornament-diamond {
-      width: 8px;
-      height: 8px;
-      background: var(--gold);
-      transform: rotate(45deg);
-      box-shadow: 0 0 12px var(--gold);
-    }
-
-    .site-title {
-      font-family: var(--font-display);
-      font-size: clamp(2.2rem, 6vw, 4.2rem);
-      font-weight: 900;
-      letter-spacing: 0.05em;
-      line-height: 1.1;
-      background: linear-gradient(135deg, var(--gold-lt) 0%, var(--gold) 40%, #a07830 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: none;
-      filter: drop-shadow(0 2px 24px rgba(201,151,58,0.35));
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.25s forwards;
-    }
-
-    .site-subtitle {
-      margin-top: 16px;
-      font-size: 1.25rem;
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(245,237,224,0.5);
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.4s forwards;
-    }
-
-    .header-tagline {
-      margin-top: 10px;
-      font-style: italic;
-      font-size: 1.1rem;
-      color: rgba(245,237,224,0.35);
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.55s forwards;
-    }
-
-    /* ─── DIVIDER ────────────────────────────────────── */
-    .section-divider {
-      width: 100%;
-      max-width: 600px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin: 8px 0 56px;
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.65s forwards;
-    }
-
-    .section-divider .line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(201,151,58,0.3), transparent);
-    }
-
-    .section-divider .crown { font-size: 1.4rem; }
-
-    /* ─── GAME CARDS GRID ────────────────────────────── */
-    .games-grid {
+        radial-gradient(circle at top, rgba(59,130,246,.25), transparent 35%),
+        linear-gradient(180deg, #08111f 0%, #0b1020 100%);
+      color: #e5eefc;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 40px;
-      width: 100%;
-      max-width: 900px;
+      place-items: center;
+      padding: 24px;
     }
-
-    .game-card {
-      position: relative;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
+    .wrap {
+      width: min(960px, 100%);
+      background: rgba(9, 14, 28, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: blur(10px);
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.2rem); }
+    p { margin: 0 0 24px; color: #b7c5e2; line-height: 1.6; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-top: 12px;
+    }
+    a.card {
       text-decoration: none;
       color: inherit;
       display: block;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease;
+      padding: 22px;
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: linear-gradient(180deg, rgba(15,23,42,.9), rgba(15,23,42,.6));
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      min-height: 180px;
     }
-
-    .game-card:nth-child(1) { animation: fadeUp 0.9s ease 0.75s forwards; }
-    .game-card:nth-child(2) { animation: fadeUp 0.9s ease 0.9s  forwards; }
-
-    /* Gold border frame */
-    .game-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border: 1px solid rgba(201,151,58,0.25);
-      border-radius: 4px;
-      pointer-events: none;
-      z-index: 3;
-      transition: border-color 0.3s ease;
+    a.card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(96,165,250,.55);
+      box-shadow: 0 14px 36px rgba(0,0,0,.28);
     }
-
-    .game-card:hover::before {
-      border-color: rgba(201,151,58,0.7);
+    .tag {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(59,130,246,.18);
+      color: #93c5fd;
+      font-size: .82rem;
+      margin-bottom: 14px;
     }
-
-    .game-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.8), 0 0 40px rgba(201,151,58,0.12);
-    }
-
-    /* Corner ornaments */
-    .game-card::after {
-      content: '';
-      position: absolute;
-      top: 10px; left: 10px;
-      right: 10px; bottom: 10px;
-      border-top: 1px solid rgba(201,151,58,0.12);
-      border-left: 1px solid rgba(201,151,58,0.12);
-      pointer-events: none;
-      z-index: 3;
-      border-radius: 2px;
-      transition: border-color 0.3s ease;
-    }
-
-    .game-card:hover::after { border-color: rgba(201,151,58,0.3); }
-
-    /* ─── CARD INTERIOR ─────────────────────────────── */
-    .card-bg {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      transition: transform 0.5s cubic-bezier(0.23,1,0.32,1);
-    }
-
-    .game-card:hover .card-bg { transform: scale(1.04); }
-
-    .card-bg--kniffel {
-      background:
-        radial-gradient(ellipse at 30% 60%, rgba(139,32,32,0.4) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(80,20,20,0.5) 0%, transparent 50%),
-        linear-gradient(160deg, #1a0808 0%, #0d0808 100%);
-    }
-
-    .card-bg--schiffe {
-      background:
-        radial-gradient(ellipse at 70% 40%, rgba(15,32,64,0.8) 0%, transparent 60%),
-        radial-gradient(ellipse at 20% 80%, rgba(30,95,116,0.4) 0%, transparent 50%),
-        linear-gradient(160deg, #060e1a 0%, #040810 100%);
-    }
-
-    /* Texture noise overlay */
-    .card-noise {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-      opacity: 0.4;
-      mix-blend-mode: overlay;
-    }
-
-    .card-content {
-      position: relative;
-      z-index: 2;
-      padding: 44px 36px 36px;
-    }
-
-    /* Dice/ship scene */
-    .card-scene {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      transition: transform 0.3s ease;
-    }
-
-    .game-card:hover .card-scene { transform: scale(1.08) rotate(-2deg); }
-
-    .card-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border: 1px solid currentColor;
-      border-radius: 2px;
-      margin-bottom: 16px;
-      font-weight: 600;
-    }
-
-    .card-badge--kniffel { color: var(--red); border-color: rgba(139,32,32,0.5); }
-    .card-badge--schiffe { color: var(--sea); border-color: rgba(30,95,116,0.5); }
-
-    .card-title {
-      font-family: var(--font-display);
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      line-height: 1.2;
-      color: var(--parch);
-      margin-bottom: 12px;
-    }
-
-    .card-desc {
-      font-size: 1rem;
-      font-weight: 300;
-      line-height: 1.65;
-      color: rgba(245,237,224,0.6);
-      margin-bottom: 28px;
-    }
-
-    /* Feature pills */
-    .card-features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-
-    .feature-pill {
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 2px;
-      background: rgba(245,237,224,0.06);
-      color: rgba(245,237,224,0.5);
-      letter-spacing: 0.05em;
-      border: 1px solid rgba(245,237,224,0.08);
-    }
-
-    /* CTA button */
-    .card-cta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      border-radius: 3px;
-      font-family: var(--font-display);
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      font-weight: 700;
-      text-transform: uppercase;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-cta::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-      transform: translateX(-100%);
-      transition: transform 0.4s ease;
-    }
-
-    .game-card:hover .card-cta::before { transform: translateX(100%); }
-
-    .card-cta--kniffel {
-      background: linear-gradient(135deg, var(--red), #6e1818);
-      color: var(--parch);
-      box-shadow: 0 4px 20px rgba(139,32,32,0.4);
-    }
-
-    .card-cta--schiffe {
-      background: linear-gradient(135deg, var(--navy-lt), var(--navy));
-      color: var(--parch);
-      box-shadow: 0 4px 20px rgba(15,32,64,0.6), inset 0 1px 0 rgba(30,95,116,0.4);
-    }
-
-    .game-card:hover .card-cta--kniffel {
-      box-shadow: 0 6px 28px rgba(139,32,32,0.6);
-    }
-
-    .game-card:hover .card-cta--schiffe {
-      box-shadow: 0 6px 28px rgba(30,95,116,0.5);
-    }
-
-    .cta-arrow {
-      font-size: 1.2rem;
-      transition: transform 0.25s ease;
-    }
-
-    .game-card:hover .cta-arrow { transform: translateX(5px); }
-
-    /* ─── DECORATIVE SEPARATOR ──────────────────────── */
-    .mid-sep {
-      width: 100%;
-      max-width: 900px;
-      position: relative;
-      text-align: center;
-      margin: 68px 0 56px;
-      opacity: 0;
-      animation: fadeIn 1s ease 1.2s forwards;
-    }
-
-    .mid-sep::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(201,151,58,0.2), rgba(201,151,58,0.4), rgba(201,151,58,0.2), transparent);
-    }
-
-    .mid-sep-inner {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      padding: 0 24px;
-      background: var(--ink);
-      font-family: var(--font-display);
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(201,151,58,0.5);
-    }
-
-    /* ─── INFO ROW ───────────────────────────────────── */
-    .info-row {
-      width: 100%;
-      max-width: 900px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 24px;
-      opacity: 0;
-      animation: fadeUp 0.9s ease 1.4s forwards;
-    }
-
-    .info-card {
-      padding: 28px 24px;
-      border: 1px solid rgba(201,151,58,0.12);
-      border-radius: 3px;
-      background: rgba(245,237,224,0.02);
-      text-align: center;
-      transition: border-color 0.3s ease, background 0.3s ease;
-    }
-
-    .info-card:hover {
-      border-color: rgba(201,151,58,0.3);
-      background: rgba(245,237,224,0.04);
-    }
-
-    .info-icon {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-    }
-
-    .info-label {
-      font-family: var(--font-display);
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 6px;
-    }
-
-    .info-value {
-      font-size: 1.05rem;
-      font-weight: 300;
-      color: rgba(245,237,224,0.7);
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────── */
-    footer {
-      width: 100%;
-      max-width: 900px;
-      margin-top: 80px;
-      padding-top: 28px;
-      border-top: 1px solid rgba(201,151,58,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      font-size: 0.85rem;
-      color: rgba(245,237,224,0.3);
-      opacity: 0;
-      animation: fadeIn 1s ease 1.7s forwards;
-    }
-
-    footer a {
-      color: rgba(201,151,58,0.5);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    footer a:hover { color: var(--gold); }
-
-    .footer-links { display: flex; gap: 20px; }
-
-    /* ─── ANIMATIONS ─────────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    /* ─── RESPONSIVE ─────────────────────────────────── */
-    @media (max-width: 600px) {
-      header { padding: 48px 0 36px; }
-      .games-grid { grid-template-columns: 1fr; gap: 28px; }
-      .card-content { padding: 32px 24px 28px; }
-      .card-title { font-size: 1.5rem; }
-      footer { flex-direction: column; align-items: flex-start; gap: 12px; }
-    }
-
-    /* ─── FOCUS STYLES ───────────────────────────────── */
-    .game-card:focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 4px;
-    }
+    .title { font-size: 1.35rem; margin: 0 0 8px; }
+    .desc { color: #c7d2fe; line-height: 1.55; margin: 0; }
+    .footer { margin-top: 22px; color: #7f8aa3; font-size: .92rem; }
+    .small { margin-top: 10px; font-size: .88rem; color: #8fa3c7; }
+    code { background: rgba(148,163,184,.12); padding: 2px 6px; border-radius: 6px; }
   </style>
 </head>
 <body>
+  <main class="wrap">
+    <h1>Spielehub</h1>
+    <p>Wähle eines deiner Spiele aus. Jedes Spiel bleibt technisch eigenständig und nutzt weiterhin seine eigene Logik, sein Layout und seine Modelle.</p>
 
-  <!-- Animated background -->
-  <div class="bg-canvas" aria-hidden="true">
-    <div class="bg-grid"></div>
-  </div>
-
-  <div class="page">
-    <!-- ── HEADER ─────────────────────────────────────── -->
-    <header>
-      <div class="header-ornament">
-        <div class="ornament-line"></div>
-        <div class="ornament-diamond"></div>
-        <div class="ornament-diamond" style="width:5px;height:5px;opacity:0.5;margin:0 4px"></div>
-        <div class="ornament-diamond"></div>
-        <div class="ornament-line"></div>
-      </div>
-
-      <h1 class="site-title">Spielehub</h1>
-      <p class="site-subtitle">Klassische Spiele &nbsp;·&nbsp; Online &amp; Lokal</p>
-      <p class="header-tagline">Wähle dein Spiel und fordere deine Freunde heraus</p>
-    </header>
-
-    <div class="section-divider">
-      <span class="line"></span>
-      <span class="crown">♟</span>
-      <span class="line"></span>
-    </div>
-
-    <!-- ── GAME CARDS ─────────────────────────────────── -->
-    <div class="games-grid">
-
-      <!-- Kniffel -->
-      <a class="game-card" href="kniffel/index.html" aria-label="Kniffel spielen">
-        <div class="card-bg card-bg--kniffel"></div>
-        <div class="card-noise"></div>
-        <div class="card-content">
-          <div class="card-scene">🎲🎲🎲</div>
-          <div class="card-badge card-badge--kniffel">⬡ Würfelspiel</div>
-          <h2 class="card-title">Kniffel Online</h2>
-          <p class="card-desc">
-            Das klassische Würfelspiel für bis zu 4 Spieler — mit Echtzeit-Multiplayer, Live-Chat und Spielstatistiken.
-          </p>
-          <div class="card-features">
-            <span class="feature-pill">👥 Bis zu 4 Spieler</span>
-            <span class="feature-pill">💬 Live-Chat</span>
-            <span class="feature-pill">📊 Statistiken</span>
-            <span class="feature-pill">🏆 Rangliste</span>
-          </div>
-          <div class="card-cta card-cta--kniffel">
-            <span>Jetzt spielen</span>
-            <span class="cta-arrow">→</span>
-          </div>
-        </div>
+    <section class="grid">
+      <a class="card" href="/kniffel/">
+        <span class="tag">Würfelspiel</span>
+        <h2 class="title">Kniffel</h2>
+        <p class="desc">Öffnet dein Kniffel-Projekt mit eigener Oberfläche und eigener App-Logik direkt im Browser.</p>
       </a>
 
-      <!-- Schiffe versenken -->
-      <a class="game-card" href="battleship/index.html" aria-label="Schiffe versenken spielen">
-        <div class="card-bg card-bg--schiffe"></div>
-        <div class="card-noise"></div>
-        <div class="card-content">
-          <div class="card-scene">🚢⚓🌊</div>
-          <div class="card-badge card-badge--schiffe">⬡ Strategiespiel</div>
-          <h2 class="card-title">Schiffe versenken Deluxe</h2>
-          <p class="card-desc">
-            Taktisches Seegefecht gegen den Computer oder einen Freund — mit Multiplayer-Lobby und Zuschauermodus.
-          </p>
-          <div class="card-features">
-            <span class="feature-pill">🤖 KI-Gegner</span>
-            <span class="feature-pill">👥 Multiplayer</span>
-            <span class="feature-pill">👁 Zuschauermodus</span>
-            <span class="feature-pill">🌐 Mehrsprachig</span>
-          </div>
-          <div class="card-cta card-cta--schiffe">
-            <span>Jetzt spielen</span>
-            <span class="cta-arrow">→</span>
-          </div>
-        </div>
+      <a class="card" href="/battleship/">
+        <span class="tag">Taktikspiel</span>
+        <h2 class="title">Battleship Deluxe</h2>
+        <p class="desc">Startet dein Schiffe-versenken-Projekt mit Multiplayer, Design und allen vorhandenen Funktionen.</p>
       </a>
+    </section>
 
-    </div>
-
-    <!-- ── SEPARATOR ───────────────────────────────────── -->
-    <div class="mid-sep">
-      <div class="mid-sep-inner">
-        <span>✦</span>
-        <span>Spielehub</span>
-        <span>✦</span>
-      </div>
-    </div>
-
-    <!-- ── INFO ROW ────────────────────────────────────── -->
-    <div class="info-row">
-      <div class="info-card">
-        <div class="info-icon">🎮</div>
-        <div class="info-label">Spiele verfügbar</div>
-        <div class="info-value">2 Klassiker</div>
-      </div>
-      <div class="info-card">
-        <div class="info-icon">👥</div>
-        <div class="info-label">Spielmodus</div>
-        <div class="info-value">Lokal &amp; Online</div>
-      </div>
-      <div class="info-card">
-        <div class="info-icon">📡</div>
-        <div class="info-label">Technologie</div>
-        <div class="info-value">WebSocket · Node.js</div>
-      </div>
-      <div class="info-card">
-        <div class="info-icon">🆓</div>
-        <div class="info-label">Kosten</div>
-        <div class="info-value">Kostenlos &amp; werbefrei</div>
-      </div>
-    </div>
-
-    <!-- ── FOOTER ─────────────────────────────────────── -->
-    <footer>
-      <span>© 2026 Spielehub · Alle Spiele selbst gehostet</span>
-      <div class="footer-links">
-        <a href="kniffel/index.html#impressum" onclick="event.preventDefault(); window.location='kniffel/index.html'">Impressum</a>
-        <a href="battleship/impressum.html">Datenschutz</a>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Floating particles -->
-  <script>
-    const canvas = document.querySelector('.bg-canvas');
-    const colors = ['rgba(201,151,58,0.6)', 'rgba(139,32,32,0.4)', 'rgba(30,95,116,0.5)', 'rgba(245,237,224,0.2)'];
-    for (let i = 0; i < 18; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      const size = Math.random() * 4 + 1;
-      p.style.cssText = `
-        width:${size}px; height:${size}px;
-        left:${Math.random()*100}%;
-        background:${colors[Math.floor(Math.random()*colors.length)]};
-        animation-duration:${8 + Math.random()*14}s;
-        animation-delay:${Math.random()*12}s;
-      `;
-      canvas.appendChild(p);
-    }
-  </script>
-
+    <div class="small">Pfadbeispiele: <code>/kniffel/</code> und <code>/battleship/</code></div>
+    <div class="footer">Der Hub ist nur die Verlinkung – die Spiele selbst bleiben unverändert.</div>
+  </main>
 </body>
 </html>
